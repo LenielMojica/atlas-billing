@@ -137,13 +137,15 @@ required_apps = ["erpnext"]
 # ---------------
 # Hook on document methods and events
 
-# doc_events = {
-# 	"*": {
+doc_events = {
+	"Item": {
 # 		"on_update": "method",
 # 		"on_cancel": "method",
 # 		"on_trash": "method"
-# 	}
-# }
+    "after_insert":"atlas_billing.item_events.create_hair_variants"
+    
+	}
+ }
 
 # Scheduled Tasks
 # ---------------
