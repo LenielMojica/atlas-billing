@@ -95,5 +95,3 @@ def create_generic_item():
 				"price_list_rate": 1,
 			}
 		).insert(ignore_permissions=True)
-
-	frappe.db.commit()
