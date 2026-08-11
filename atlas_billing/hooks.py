@@ -23,7 +23,7 @@ required_apps = ["erpnext"]
 
 # Includes in <head>
 # ------------------
-
+doctype_js = {"POS Invoice": "public/js/pos_invoice_item.js"}
 # include js, css files in header of desk.html
 # app_include_css = "/assets/atlas_billing/css/atlas_billing.css"
 # app_include_js = "/assets/atlas_billing/js/atlas_billing.js"
@@ -137,13 +137,15 @@ required_apps = ["erpnext"]
 # ---------------
 # Hook on document methods and events
 
-# doc_events = {
-# 	"*": {
-# 		"on_update": "method",
-# 		"on_cancel": "method",
-# 		"on_trash": "method"
-# 	}
-# }
+doc_events = {
+	"Item": {
+		# 		"on_update": "method",
+		# 		"on_cancel": "method",
+		# 		"on_trash": "method"
+		"after_insert": "atlas_billing.item_events.create_hair_variants"
+	},
+	"POS Invoice": {"validate": "atlas_billing.utils.validate_generic_item"},
+}
 
 # Scheduled Tasks
 # ---------------
