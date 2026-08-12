@@ -26,7 +26,7 @@ frappe.ui.form.on("POS Invoice Item", {
 			primary_action_label: "Confirmar",
 			primary_action(values) {
 				if (values.rate <= 1) {
-					frappe.msgprint("El precio debe ser mayor a 1");
+					frappe.msgprint(__("El precio debe ser mayor a 1"));
 					return;
 				}
 				frappe.model.set_value(cdt, cdn, "description", values.description);

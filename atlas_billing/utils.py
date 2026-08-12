@@ -10,4 +10,4 @@ def validate_generic_item(doc, method):
 			continue
 
 		if item.rate <= 1 or not item.description or item.description == item.item_name:
-			frappe.throw(_("Los servicios genéricos deben tener descripción y precio mayor a 1. "))
+			frappe.throw(_("Los servicios genéricos deben tener descripción y precio mayor a 1."))
