@@ -23,7 +23,14 @@ required_apps = ["erpnext"]
 
 # Includes in <head>
 # ------------------
-fixtures = [{"dt": "Custom Field", "filters": [["dt", "=", "POS Invoice"]]}]
+fixtures = [
+	{
+		"dt": "Custom Field",
+		"filters": [["fieldname", "in", ["cancellation_reason", "tipo_cliente", "fecha_nacimiento"]]],
+	},
+	{"dt": "Item Group", "filters": [["name", "in", ["Capilar", "Cuidado facial", "Masaje"]]]},
+	{"dt": "Item Attribute", "filters": [["name", "=", "Longitud de pelo"]]},
+]
 
 doctype_js = {"POS Invoice": ["public/js/pos_invoice_item.js", "public/js/pos_invoice_cancel.js"]}
 # include js, css files in header of desk.html
