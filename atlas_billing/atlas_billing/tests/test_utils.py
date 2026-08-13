@@ -3,7 +3,7 @@ from types import SimpleNamespace
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
-from atlas_billing.utils import validate_generic_item
+from atlas_billing.utils import validate_cancellation_reason, validate_generic_item
 
 
 class TestValidateGenericItem(FrappeTestCase):
@@ -76,3 +76,23 @@ class TestValidateGenericItem(FrappeTestCase):
 		doc_falso = SimpleNamespace(items=[item_falso])
 
 		validate_generic_item(doc_falso, "validate")
+
+
+class TestValidateCancellationReason(FrappeTestCase):
+	def test_description_throws_when_none(self):
+		fake_inv = SimpleNamespace(cancellation_reason=None)
+
+		with self.assertRaises(frappe.ValidationError):
+			validate_cancellation_reason(fake_inv, "before_cancellation")
+
+	def test_description_throws_when_set_to_spaces(self):
+		fake_inv = SimpleNamespace(cancellation_reason="      ")
+
+		with self.assertRaises(frappe.ValidationError):
+			validate_cancellation_reason(fake_inv, "before_cancellation")
+
+	def test_description_throws_when_set_empty(self):
+		fake_inv = SimpleNamespace(cancellation_reason="")
+
+		with self.assertRaises(frappe.ValidationError):
+			validate_cancellation_reason(fake_inv, "before_cancellation")
