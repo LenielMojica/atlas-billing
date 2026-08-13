@@ -23,6 +23,8 @@ required_apps = ["erpnext"]
 
 # Includes in <head>
 # ------------------
+fixtures = [{"dt": "Custom Field", "filters": [["dt", "=", "POS Invoice"]]}]
+
 doctype_js = {"POS Invoice": "public/js/pos_invoice_item.js"}
 # include js, css files in header of desk.html
 # app_include_css = "/assets/atlas_billing/css/atlas_billing.css"
