@@ -1,0 +1,41 @@
+[
+ {
+  "docstatus": 0,
+  "doctype": "Item Group",
+  "image": null,
+  "is_group": 0,
+  "item_group_defaults": [],
+  "item_group_name": "Capilar",
+  "modified": "2026-08-09 14:53:51.298681",
+  "name": "Capilar",
+  "old_parent": "Services",
+  "parent_item_group": "Services",
+  "taxes": []
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Item Group",
+  "image": null,
+  "is_group": 0,
+  "item_group_defaults": [],
+  "item_group_name": "Cuidado facial",
+  "modified": "2026-08-09 14:53:51.443174",
+  "name": "Cuidado facial",
+  "old_parent": "Services",
+  "parent_item_group": "Services",
+  "taxes": []
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Item Group",
+  "image": null,
+  "is_group": 0,
+  "item_group_defaults": [],
+  "item_group_name": "Masaje",
+  "modified": "2026-08-09 14:53:51.451345",
+  "name": "Masaje",
+  "old_parent": "Services",
+  "parent_item_group": "Services",
+  "taxes": []
+ }
+]

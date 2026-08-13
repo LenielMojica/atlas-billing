@@ -8,7 +8,7 @@ from atlas_billing.utils import validate_cancellation_reason, validate_generic_i
 
 class TestValidateGenericItem(FrappeTestCase):
 	def test_throws_when_price_not_set(self):
-		item_falso = frappe._dict(
+		fake_item = frappe._dict(
 			{
 				"item_code": "SERV-GENERICO",
 				"item_name": "Servicio genérico",
@@ -18,13 +18,13 @@ class TestValidateGenericItem(FrappeTestCase):
 			}
 		)
 
-		doc_falso = SimpleNamespace(items=[item_falso])
+		fake_doc = SimpleNamespace(items=[fake_item])
 
 		with self.assertRaises(frappe.ValidationError):
-			validate_generic_item(doc_falso, "validate")
+			validate_generic_item(fake_doc, "validate")
 
 	def test_throws_when_descrption_not_set(self):
-		item_falso = frappe._dict(
+		fake_item = frappe._dict(
 			{
 				"item_code": "SERV-GENERICO",
 				"item_name": "Servicio genérico",
@@ -32,12 +32,12 @@ class TestValidateGenericItem(FrappeTestCase):
 				"idx": 1,
 			}
 		)
-		doc_falso = SimpleNamespace(items=[item_falso])
+		fake_doc = SimpleNamespace(items=[fake_item])
 		with self.assertRaises(frappe.ValidationError):
-			validate_generic_item(doc_falso, "validate")
+			validate_generic_item(fake_doc, "validate")
 
 	def test_passes_with_description_and_price(self):
-		item_falso = frappe._dict(
+		fake_item = frappe._dict(
 			{
 				"item_code": "SERV-GENERICO",
 				"item_name": "Servicio genérico",
@@ -46,12 +46,12 @@ class TestValidateGenericItem(FrappeTestCase):
 				"idx": 1,
 			}
 		)
-		doc_falso = SimpleNamespace(items=[item_falso])
+		fake_doc = SimpleNamespace(items=[fake_item])
 
-		validate_generic_item(doc_falso, "validate")
+		validate_generic_item(fake_doc, "validate")
 
 	def test_passes_with_non_generic_item_no_description(self):
-		item_falso = frappe._dict(
+		fake_item = frappe._dict(
 			{
 				"item_code": "Non-G",
 				"item_name": "Shampoo",
@@ -59,12 +59,12 @@ class TestValidateGenericItem(FrappeTestCase):
 				"idx": 1,
 			}
 		)
-		doc_falso = SimpleNamespace(items=[item_falso])
+		fake_doc = SimpleNamespace(items=[fake_item])
 
-		validate_generic_item(doc_falso, "validate")
+		validate_generic_item(fake_doc, "validate")
 
 	def test_passes_with_non_generic_item_description(self):
-		item_falso = frappe._dict(
+		fake_item = frappe._dict(
 			{
 				"item_code": "Non-G",
 				"item_name": "Corte",
@@ -73,9 +73,9 @@ class TestValidateGenericItem(FrappeTestCase):
 				"idx": 1,
 			}
 		)
-		doc_falso = SimpleNamespace(items=[item_falso])
+		fake_doc = SimpleNamespace(items=[fake_item])
 
-		validate_generic_item(doc_falso, "validate")
+		validate_generic_item(fake_doc, "validate")
 
 
 class TestValidateCancellationReason(FrappeTestCase):

@@ -1,0 +1,37 @@
+[
+ {
+  "attribute_name": "Longitud de pelo",
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Item Attribute",
+  "from_range": 0.0,
+  "increment": 0.0,
+  "item_attribute_values": [
+   {
+    "abbr": "S",
+    "attribute_value": "Corto",
+    "parent": "Longitud de pelo",
+    "parentfield": "item_attribute_values",
+    "parenttype": "Item Attribute"
+   },
+   {
+    "abbr": "L",
+    "attribute_value": "Largo",
+    "parent": "Longitud de pelo",
+    "parentfield": "item_attribute_values",
+    "parenttype": "Item Attribute"
+   },
+   {
+    "abbr": "XL",
+    "attribute_value": "Extra Largo",
+    "parent": "Longitud de pelo",
+    "parentfield": "item_attribute_values",
+    "parenttype": "Item Attribute"
+   }
+  ],
+  "modified": "2026-08-09 14:55:18.354095",
+  "name": "Longitud de pelo",
+  "numeric_values": 0,
+  "to_range": 0.0
+ }
+]
