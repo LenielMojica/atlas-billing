@@ -3,7 +3,11 @@ from types import SimpleNamespace
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
-from atlas_billing.utils import validate_cancellation_reason, validate_generic_item
+from atlas_billing.utils import (
+	validate_cancellation_reason,
+	validate_closing_entry_differences,
+	validate_generic_item,
+)
 
 
 class TestValidateGenericItem(FrappeTestCase):
@@ -95,4 +99,42 @@ class TestValidateCancellationReason(FrappeTestCase):
 		fake_inv = SimpleNamespace(cancellation_reason="")
 
 		with self.assertRaises(frappe.ValidationError):
-			validate_cancellation_reason(fake_inv, "before_cancellation")
+			validate_cancellation_reason(fake_inv, "before_cancel")
+
+
+class TestValidateDifferenceReason(FrappeTestCase):
+	def test_difference_reason_throws_when_empty(self):
+		fake_row = frappe._dict(
+			{
+				"mode_of_payment": "Cash",
+				"difference": 400,
+				"custom_motivo_de_la_diferencia": "",
+			}
+		)
+		fake_doc = SimpleNamespace(payment_reconciliation=[fake_row])
+
+		with self.assertRaises(frappe.ValidationError):
+			validate_closing_entry_differences(fake_doc, "validate")
+
+	def test_passes_when_difference_and_reason_given(self):
+		fake_row = frappe._dict(
+			{
+				"mode_of_payment": "Cash",
+				"difference": 400,
+				"custom_motivo_de_la_diferencia": "Se cobró de más por error",
+			}
+		)
+		fake_doc = SimpleNamespace(payment_reconciliation=[fake_row])
+		validate_closing_entry_differences(fake_doc, "validate")
+
+	def test_passes_when_no_difference(self):
+		fake_row = frappe._dict(
+			{
+				"mode_of_payment": "Cash",
+				"difference": 0,
+				"custom_motivo_de_la_diferencia": "",
+			}
+		)
+		fake_doc = SimpleNamespace(payment_reconciliation=[fake_row])
+
+		validate_closing_entry_differences(fake_doc, "validate")
