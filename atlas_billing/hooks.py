@@ -26,7 +26,13 @@ required_apps = ["erpnext"]
 fixtures = [
 	{
 		"dt": "Custom Field",
-		"filters": [["fieldname", "in", ["cancellation_reason", "tipo_cliente", "fecha_nacimiento"]]],
+		"filters": [
+			[
+				"fieldname",
+				"in",
+				["cancellation_reason", "tipo_cliente", "fecha_nacimiento", "custom_motivo_de_la_diferencia"],
+			]
+		],
 	},
 	{"dt": "Item Group", "filters": [["name", "in", ["Capilar", "Cuidado facial", "Masaje"]]]},
 	{"dt": "Item Attribute", "filters": [["name", "=", "Longitud de pelo"]]},
@@ -156,6 +162,9 @@ doc_events = {
 	"POS Invoice": {
 		"validate": "atlas_billing.utils.validate_generic_item",
 		"before_cancel": "atlas_billing.utils.validate_cancellation_reason",
+	},
+	"POS Closing Entry": {
+		"validate": "atlas_billing.utils.validate_closing_entry_differences",
 	},
 }
 
