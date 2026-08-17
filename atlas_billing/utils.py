@@ -22,3 +22,18 @@ def validate_closing_entry_differences(doc, method):
 	for row in doc.payment_reconciliation:
 		if row.difference and not row.custom_motivo_de_la_diferencia:
 			frappe.throw(_("Hay diferencias sin detallar en {0}").format(row.mode_of_payment))
+
+
+def validate_locked_price(doc, method):
+	if "Item Manager" in frappe.get_roles(frappe.session.user):
+		return
+	for item in doc.items:
+		if item.item_code == GENERIC_ITEM_CODE:
+			continue
+		catalog_rate = frappe.db.get_value(
+			"Item Price",
+			{"item_code": item.item_code, "price_list": doc.selling_price_list},
+			"price_list_rate",
+		)
+		if catalog_rate is not None and item.rate != catalog_rate:
+			frappe.throw(_("El precio de  {0} no coincide con el catalogo").format(item.item_name))

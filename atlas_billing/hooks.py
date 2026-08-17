@@ -160,7 +160,10 @@ doc_events = {
 		"after_insert": "atlas_billing.item_events.create_hair_variants"
 	},
 	"POS Invoice": {
-		"validate": "atlas_billing.utils.validate_generic_item",
+		"validate": [
+			"atlas_billing.utils.validate_generic_item",
+			"atlas_billing.utils.validate_locked_price",
+		],
 		"before_cancel": "atlas_billing.utils.validate_cancellation_reason",
 	},
 	"POS Closing Entry": {

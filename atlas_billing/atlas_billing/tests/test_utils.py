@@ -1,4 +1,5 @@
 from types import SimpleNamespace
+from unittest.mock import patch
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
@@ -7,6 +8,7 @@ from atlas_billing.utils import (
 	validate_cancellation_reason,
 	validate_closing_entry_differences,
 	validate_generic_item,
+	validate_locked_price,
 )
 
 
@@ -138,3 +140,39 @@ class TestValidateDifferenceReason(FrappeTestCase):
 		fake_doc = SimpleNamespace(payment_reconciliation=[fake_row])
 
 		validate_closing_entry_differences(fake_doc, "validate")
+
+
+class TestValidateLockedPrice(FrappeTestCase):
+	def test_passes_when_user_is_item_manager(self):
+		fake_item = frappe._dict({"item_code": "Non-G", "item_name": "Corte-Corto", "rate": 999})
+		fake_doc = SimpleNamespace(items=[fake_item], selling_price_list="Standard Selling")
+
+		with patch("atlas_billing.utils.frappe.get_roles", return_value=["Item Manager"]):
+			validate_locked_price(fake_doc, "validate")
+
+	def test_passes_when_user_is_not_item_manager(self):
+		fake_item = frappe._dict({"item_code": "Corte-001", "item_name": "Corte", "rate": 500})
+		fake_doc = SimpleNamespace(items=[fake_item], selling_price_list="Standard Selling")
+
+		with (
+			patch(
+				"atlas_billing.utils.frappe.get_roles",
+				return_value=["Sales User", "Stock User", "Accounts User"],
+			),
+			patch("atlas_billing.utils.frappe.db.get_value", return_value=500),
+		):
+			validate_locked_price(fake_doc, "validate")
+
+	def test_fails_when_user_is_not_item_manager(self):
+		fake_item = frappe._dict({"item_code": "Corte-001", "item_name": "Corte", "rate": 500})
+		fake_doc = SimpleNamespace(items=[fake_item], selling_price_list="Standard Selling")
+
+		with (
+			patch(
+				"atlas_billing.utils.frappe.get_roles",
+				return_value=["Sales User", "Stock User", "Accounts User"],
+			),
+			patch("atlas_billing.utils.frappe.db.get_value", return_value=1000),
+		):
+			with self.assertRaises(frappe.ValidationError):
+				validate_locked_price(fake_doc, "validate")
