@@ -4,6 +4,7 @@ from unittest.mock import patch
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
+from atlas_billing.item_events import validate_service_stock
 from atlas_billing.utils import (
 	validate_cancellation_reason,
 	validate_closing_entry_differences,
@@ -176,3 +177,44 @@ class TestValidateLockedPrice(FrappeTestCase):
 		):
 			with self.assertRaises(frappe.ValidationError):
 				validate_locked_price(fake_doc, "validate")
+
+
+class TestValidateServiceStock(FrappeTestCase):
+	def test_passes_when_stock_is_0(self):
+		fake_doc = frappe._dict(
+			{
+				"is_stock_item": 0,
+			}
+		)
+		with patch("atlas_billing.item_events.frappe.db.get_value", return_value="Services"):
+			validate_service_stock(fake_doc, "validate")
+
+	def test_fails_when_stock_is_1(self):
+		fake_doc = frappe._dict(
+			{
+				"is_stock_item": 1,
+			}
+		)
+		with patch("atlas_billing.item_events.frappe.db.get_value", return_value="Services"):
+			with self.assertRaises(frappe.ValidationError):
+				validate_service_stock(fake_doc, "validate")
+
+
+class TestCreateHairVariants(FrappeTestCase):
+	def test_creates_three_variants_for_capilar_item(self):
+		parent = frappe.get_doc(
+			{
+				"doctype": "Item",
+				"item_code": "TEST-CORTE-HAIR",
+				"item_name": "Test Corte",
+				"item_group": "Capilar",
+				"stock_uom": "Nos",
+				"is_stock_item": 0,
+			}
+		).insert()
+
+		variants = frappe.get_all("Item", filters={"variant_of": parent.name}, fields=["item_code"])
+
+		self.assertEqual(len(variants), 3)
+		expected_codes = {f"{parent.name}-S", f"{parent.name}-L", f"{parent.name}-XL"}
+		self.assertEqual({v.item_code for v in variants}, expected_codes)

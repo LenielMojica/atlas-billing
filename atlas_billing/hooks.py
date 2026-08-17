@@ -38,7 +38,10 @@ fixtures = [
 	{"dt": "Item Attribute", "filters": [["name", "=", "Longitud de pelo"]]},
 ]
 
-doctype_js = {"POS Invoice": ["public/js/pos_invoice_item.js", "public/js/pos_invoice_cancel.js"]}
+doctype_js = {
+	"POS Invoice": ["public/js/pos_invoice_item.js", "public/js/pos_invoice_cancel.js"],
+	"Item": ["public/js/item_variants_handler.js"],
+}
 # include js, css files in header of desk.html
 # app_include_css = "/assets/atlas_billing/css/atlas_billing.css"
 # app_include_js = "/assets/atlas_billing/js/atlas_billing.js"
@@ -157,7 +160,8 @@ doc_events = {
 		# 		"on_update": "method",
 		# 		"on_cancel": "method",
 		# 		"on_trash": "method"
-		"after_insert": "atlas_billing.item_events.create_hair_variants"
+		"after_insert": "atlas_billing.item_events.create_hair_variants",
+		"validate": "atlas_billing.item_events.validate_service_stock",
 	},
 	"POS Invoice": {
 		"validate": [
