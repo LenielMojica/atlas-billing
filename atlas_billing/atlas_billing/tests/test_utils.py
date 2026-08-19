@@ -218,3 +218,69 @@ class TestCreateHairVariants(FrappeTestCase):
 		self.assertEqual(len(variants), 3)
 		expected_codes = {f"{parent.name}-S", f"{parent.name}-L", f"{parent.name}-XL"}
 		self.assertEqual({v.item_code for v in variants}, expected_codes)
+
+
+from frappe.desk.query_report import run
+
+
+class TestSalesByCategoryReport(FrappeTestCase):
+	def test_splits_totals_between_service_and_product(self):
+		test_date = "2026-02-15"
+
+		service_item = frappe.get_doc(
+			{
+				"doctype": "Item",
+				"item_code": "TEST-SERVICE-REPORT",
+				"item_name": "Test Service",
+				"item_group": "Cuidado facial",
+				"stock_uom": "Nos",
+				"is_stock_item": 0,
+			}
+		).insert()
+
+		product_item = frappe.get_doc(
+			{
+				"doctype": "Item",
+				"item_code": "TEST-PRODUCT-REPORT",
+				"item_name": "Test Product",
+				"item_group": "Products",
+				"stock_uom": "Nos",
+				"is_stock_item": 0,
+			}
+		).insert()
+
+		invoice = frappe.get_doc(
+			{
+				"doctype": "Sales Invoice",
+				"customer": "Leniel",
+				"company": "Ejemplo Src",
+				"posting_date": test_date,
+				"due_date": test_date,
+				"set_posting_time": 1,
+				"items": [
+					{
+						"item_code": service_item.name,
+						"qty": 1,
+						"rate": 300,
+						"income_account": "Sales - ES",
+						"cost_center": "Main - ES",
+					},
+					{
+						"item_code": product_item.name,
+						"qty": 1,
+						"rate": 500,
+						"income_account": "Sales - ES",
+						"cost_center": "Main - ES",
+					},
+				],
+			}
+		)
+		invoice.insert()
+		invoice.submit()
+
+		result = run(report_name="Sales by category", filters={"from_date": test_date, "to_date": test_date})
+
+		totals = {row["categoria"]: row["total_vendido"] for row in result["result"]}
+
+		self.assertEqual(totals.get("Servicio (Exento)"), 300)
+		self.assertEqual(totals.get("Producto (Gravado)"), 500)
