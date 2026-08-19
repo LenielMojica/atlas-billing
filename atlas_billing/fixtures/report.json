@@ -64,5 +64,46 @@
   ],
   "snapshot_report": 0,
   "timeout": 0
+ },
+ {
+  "add_total_row": 0,
+  "add_translate_data": 0,
+  "columns": [],
+  "disable_prepared_report_automation": 0,
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Report",
+  "doctype_to_sync": [],
+  "filters": [],
+  "is_standard": "No",
+  "javascript": "frappe.query_reports[\"Profit and cost\"] = {\n\tfilters: [\n\t\t{\n\t\t\tfieldname: \"from_date\",\n\t\t\tlabel: \"From Date\",\n\t\t\tfieldtype: \"Date\",\n\t\t\tdefault: moment().subtract(1, \"months\").format(\"YYYY-MM-DD\"),\n\t\t\treqd: 1,\n\t\t},\n\t\t{\n\t\t\tfieldname: \"to_date\",\n\t\t\tlabel: \"To Date\",\n\t\t\tfieldtype: \"Date\",\n\t\t\tdefault: moment().format(\"YYYY-MM-DD\"),\n\t\t\treqd: 1,\n\t\t},\n\t],\n};\n",
+  "json": null,
+  "letter_head": null,
+  "modified": "2026-08-19 16:35:58.655797",
+  "module": "atlas-billing",
+  "name": "Profit and cost",
+  "prepared_report": 0,
+  "query": "SELECT\n    sii.item_code AS \"Item:Link/Item:150\",\n    sii.item_name AS \"Nombre:Data:200\",\n    SUM(sii.qty) AS \"Cantidad Vendida:Float:120\",\n    SUM(sii.amount) AS \"Total Vendido:Currency:150\",\n    b.valuation_rate AS \"Costo Promedio Ponderado:Currency:180\",\n    SUM(sii.amount) - SUM(sii.qty) * b.valuation_rate AS \"Ganancia:Currency:150\"\nFROM `tabSales Invoice Item` sii\nJOIN `tabSales Invoice` si ON si.name = sii.parent\nJOIN `tabItem` i ON i.item_code = sii.item_code\nJOIN `tabItem Group` ig ON ig.name = i.item_group\nLEFT JOIN (\n    SELECT item_code, AVG(valuation_rate) AS valuation_rate\n    FROM `tabBin`\n    WHERE actual_qty > 0\n    GROUP BY item_code\n) b ON b.item_code = sii.item_code\nWHERE si.docstatus = 1\n  AND si.posting_date BETWEEN %(from_date)s AND %(to_date)s\n  AND ig.parent_item_group != 'Services'\n  AND ig.name != 'Services'\nGROUP BY sii.item_code, sii.item_name, b.valuation_rate\nORDER BY 6 DESC\n",
+  "ref_doctype": "Sales Invoice",
+  "reference_report": null,
+  "report_name": "Profit and cost",
+  "report_script": null,
+  "report_type": "Query Report",
+  "roles": [
+   {
+    "parent": "Profit and cost",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Accounts Manager"
+   },
+   {
+    "parent": "Profit and cost",
+    "parentfield": "roles",
+    "parenttype": "Report",
+    "role": "Accounts User"
+   }
+  ],
+  "snapshot_report": 0,
+  "timeout": 0
  }
 ]

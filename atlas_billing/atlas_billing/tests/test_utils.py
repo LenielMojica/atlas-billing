@@ -284,3 +284,84 @@ class TestSalesByCategoryReport(FrappeTestCase):
 
 		self.assertEqual(totals.get("Servicio (Exento)"), 300)
 		self.assertEqual(totals.get("Producto (Gravado)"), 500)
+
+
+class TestProfitAndCostReport(FrappeTestCase):
+	def test_calculates_profit(self):
+		test_date = "2026-02-15"
+		service_item = frappe.get_doc(
+			{
+				"doctype": "Item",
+				"item_code": "TEST-SERVICE-REPORT",
+				"item_name": "Test Service",
+				"item_group": "Cuidado facial",
+				"stock_uom": "Nos",
+				"is_stock_item": 0,
+			}
+		).insert()
+
+		product_item = frappe.get_doc(
+			{
+				"doctype": "Item",
+				"item_code": "TEST-PRODUCT-REPORT",
+				"item_name": "Test Product",
+				"item_group": "Products",
+				"stock_uom": "Nos",
+				"is_stock_item": 1,
+			}
+		).insert()
+
+		stock_entry = frappe.get_doc(
+			{
+				"doctype": "Purchase Receipt",
+				"items": [
+					{
+						"item_code": product_item.name,
+						"qty": 10,
+						"rate": "200",
+						"warehouse": "Stores - ES",
+					}
+				],
+				"supplier": "Gladiolos",
+				"company": "Ejemplo Src",
+			}
+		)
+		stock_entry.insert()
+		stock_entry.submit()
+		invoice = frappe.get_doc(
+			{
+				"doctype": "Sales Invoice",
+				"customer": "Leniel",
+				"company": "Ejemplo Src",
+				"posting_date": test_date,
+				"due_date": test_date,
+				"set_posting_time": 1,
+				"items": [
+					{
+						"item_code": product_item.name,
+						"qty": 4,
+						"rate": 500,
+						"income_account": "Sales - ES",
+						"cost_center": "Main - ES",
+					},
+					{
+						"item_code": service_item.name,
+						"qty": 2,
+						"rate": 500,
+						"income_account": "Sales - ES",
+						"cost_center": "Main - ES",
+					},
+				],
+			}
+		)
+		invoice.insert()
+		invoice.submit()
+
+		result = run(report_name="Profit and cost", filters={"from_date": test_date, "to_date": test_date})
+		totals = {row["item"]: row for row in result["result"]}
+
+		self.assertIn(product_item.name, totals)
+		self.assertNotIn(service_item.name, totals)
+		self.assertEqual(totals[product_item.name]["ganancia"], 1200)
+		self.assertEqual(totals[product_item.name]["costo_promedio_ponderado"], 200)
+		self.assertEqual(totals[product_item.name]["total_vendido"], 2000)
