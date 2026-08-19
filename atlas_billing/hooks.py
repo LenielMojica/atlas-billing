@@ -37,6 +37,7 @@ fixtures = [
 	{"dt": "Item Group", "filters": [["name", "in", ["Capilar", "Cuidado facial", "Masaje"]]]},
 	{"dt": "Item Attribute", "filters": [["name", "=", "Longitud de pelo"]]},
 	{"dt": "Property Setter", "filters": [["name", "=", "Journal Entry-user_remark-reqd"]]},
+	{"dt": "Report", "filters": [["name", "=", "Sales by category"]]},
 ]
 
 doctype_js = {
