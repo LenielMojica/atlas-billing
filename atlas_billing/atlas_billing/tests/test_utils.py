@@ -199,6 +199,17 @@ class TestValidateServiceStock(FrappeTestCase):
 			with self.assertRaises(frappe.ValidationError):
 				validate_service_stock(fake_doc, "validate")
 
+	def test_fails_when_item_group_is_services_directly(self):
+		fake_doc = frappe._dict(
+			{
+				"item_group": "Services",
+				"is_stock_item": 1,
+			}
+		)
+		with patch("atlas_billing.item_events.frappe.db.get_value", return_value="All Item Groups"):
+			with self.assertRaises(frappe.ValidationError):
+				validate_service_stock(fake_doc, "validate")
+
 
 class TestCreateHairVariants(FrappeTestCase):
 	def test_creates_three_variants_for_capilar_item(self):
@@ -249,6 +260,17 @@ class TestSalesByCategoryReport(FrappeTestCase):
 			}
 		).insert()
 
+		direct_service_item = frappe.get_doc(
+			{
+				"doctype": "Item",
+				"item_code": "TEST-DIRECT-SERVICE-REPORT",
+				"item_name": "Test Direct Service",
+				"item_group": "Services",
+				"stock_uom": "Nos",
+				"is_stock_item": 0,
+			}
+		).insert()
+
 		invoice = frappe.get_doc(
 			{
 				"doctype": "Sales Invoice",
@@ -272,6 +294,13 @@ class TestSalesByCategoryReport(FrappeTestCase):
 						"income_account": "Sales - ES",
 						"cost_center": "Main - ES",
 					},
+					{
+						"item_code": direct_service_item.name,
+						"qty": 1,
+						"rate": 100,
+						"income_account": "Sales - ES",
+						"cost_center": "Main - ES",
+					},
 				],
 			}
 		)
@@ -282,7 +311,7 @@ class TestSalesByCategoryReport(FrappeTestCase):
 
 		totals = {row["categoria"]: row["total_vendido"] for row in result["result"]}
 
-		self.assertEqual(totals.get("Servicio (Exento)"), 300)
+		self.assertEqual(totals.get("Servicio (Exento)"), 400)
 		self.assertEqual(totals.get("Producto (Gravado)"), 500)
 
 
