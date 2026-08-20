@@ -42,7 +42,7 @@
   "module": "atlas-billing",
   "name": "Sales by category",
   "prepared_report": 0,
-  "query": "SELECT\n    CASE WHEN ig.parent_item_group = 'Services' THEN 'Servicio (Exento)' ELSE 'Producto (Gravado)' END AS \"Categoria:Data:200\",\n    SUM(sii.amount) AS \"Total Vendido:Currency:150\"\nFROM `tabSales Invoice Item` sii\nJOIN `tabSales Invoice` si ON si.name = sii.parent\nJOIN `tabItem` i ON i.item_code = sii.item_code\nJOIN `tabItem Group` ig ON ig.name = i.item_group\nWHERE si.docstatus = 1\n  AND si.posting_date BETWEEN %(from_date)s AND %(to_date)s\nGROUP BY CASE WHEN ig.parent_item_group = 'Services' THEN 'Servicio (Exento)' ELSE 'Producto (Gravado)' END\n",
+  "query": "SELECT\n    CASE WHEN ig.parent_item_group = 'Services' OR ig.name = 'Services' THEN 'Servicio (Exento)' ELSE 'Producto (Gravado)' END AS \"Categoria:Data:200\",\n    SUM(sii.amount) AS \"Total Vendido:Currency:150\"\nFROM `tabSales Invoice Item` sii\nJOIN `tabSales Invoice` si ON si.name = sii.parent\nJOIN `tabItem` i ON i.item_code = sii.item_code\nJOIN `tabItem Group` ig ON ig.name = i.item_group\nWHERE si.docstatus = 1\n  AND si.posting_date BETWEEN %(from_date)s AND %(to_date)s\nGROUP BY CASE WHEN ig.parent_item_group = 'Services' OR ig.name = 'Services' THEN 'Servicio (Exento)' ELSE 'Producto (Gravado)' END\n",
   "ref_doctype": "Sales Invoice",
   "reference_report": null,
   "report_name": "Sales by category",

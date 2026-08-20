@@ -38,5 +38,6 @@ def create_hair_variants(doc, method):
 
 def validate_service_stock(doc, method):
 	parent_group = frappe.db.get_value("Item Group", doc.item_group, "parent_item_group")
-	if parent_group == "Services" and doc.is_stock_item:
+
+	if (doc.item_group == "Services" or parent_group == "Services") and doc.is_stock_item:
 		frappe.throw(_("Los servicios no deben mantener inventario"))
