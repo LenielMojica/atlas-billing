@@ -394,3 +394,53 @@ class TestProfitAndCostReport(FrappeTestCase):
 		self.assertEqual(totals[product_item.name]["ganancia"], 1200)
 		self.assertEqual(totals[product_item.name]["costo_promedio_ponderado"], 200)
 		self.assertEqual(totals[product_item.name]["total_vendido"], 2000)
+
+
+class TestServiceWithTaxExemption(FrappeTestCase):
+	def test_exempt_when_is_subservice(self):
+		fake_service_item = frappe.get_doc(
+			{
+				"doctype": "Item",
+				"item_code": "TEST-XX1",
+				"item_name": "Armonizacion",
+				"stock_uom": "Nos",
+				"item_group": "Cuidado facial",
+				"is_stock_item": 0,
+			}
+		)
+		fake_service_item.insert()
+		self.assertEqual(len(fake_service_item.taxes), 1)
+		item_tax_template = frappe.get_doc("Item Tax Template", fake_service_item.taxes[0].item_tax_template)
+		self.assertEqual(item_tax_template.title, "ITBIS Exento")
+		self.assertEqual(item_tax_template.taxes[0].tax_rate, 0)
+
+	def test_exempt_when_is_service_directly(self):
+		fake_service_item = frappe.get_doc(
+			{
+				"doctype": "Item",
+				"item_code": "TEST-XX2",
+				"item_name": "Armonizacion",
+				"stock_uom": "Nos",
+				"item_group": "Services",
+				"is_stock_item": 0,
+			}
+		)
+		fake_service_item.insert()
+		self.assertEqual(len(fake_service_item.taxes), 1)
+		item_tax_template = frappe.get_doc("Item Tax Template", fake_service_item.taxes[0].item_tax_template)
+		self.assertEqual(item_tax_template.title, "ITBIS Exento")
+		self.assertEqual(item_tax_template.taxes[0].tax_rate, 0)
+
+	def test_fails_when_item_is_product(self):
+		fake_product_item = frappe.get_doc(
+			{
+				"doctype": "Item",
+				"item_code": "TEST-XX3",
+				"item_name": "Cera",
+				"stock_uom": "Nos",
+				"item_group": "Products",
+				"is_stock_item": 1,
+			}
+		)
+		fake_product_item.insert()
+		self.assertEqual(len(fake_product_item.taxes), 0)
