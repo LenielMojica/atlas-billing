@@ -3,6 +3,7 @@ import frappe
 
 def after_install():
 	create_generic_item()
+	create_exempt_item_tax_template()
 
 
 GENERIC_ITEM_CODE = "SERV-GENERICO"
@@ -32,3 +33,25 @@ def create_generic_item():
 				"price_list_rate": 1,
 			}
 		).insert(ignore_permissions=True)
+
+
+def create_exempt_item_tax_template():
+	companies = frappe.get_all("Company", pluck="name")
+	if not companies:
+		return
+	company = companies[0]
+
+	account = frappe.db.get_value("Account", {"account_name": "ITBIS", "company": company})
+	if not account:
+		return
+	if frappe.db.exists("Item Tax Template", {"title": "ITBIS Exento", "company": company}):
+		return
+
+	frappe.get_doc(
+		{
+			"doctype": "Item Tax Template",
+			"title": "ITBIS Exento",
+			"company": company,
+			"taxes": [{"tax_type": account, "tax_rate": 0}],
+		}
+	).insert()

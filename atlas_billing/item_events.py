@@ -41,3 +41,19 @@ def validate_service_stock(doc, method):
 
 	if (doc.item_group == "Services" or parent_group == "Services") and doc.is_stock_item:
 		frappe.throw(_("Los servicios no deben mantener inventario"))
+
+
+def validate_service_tax_exemption(doc, method):
+	parent_group = frappe.db.get_value("Item Group", doc.item_group, "parent_item_group")
+	if doc.item_group != "Services" and parent_group != "Services":
+		return
+	companies = frappe.get_all("Company", pluck="name")
+	if not companies:
+		return
+	company = companies[0]
+	tax_template = frappe.db.get_value("Item Tax Template", {"title": "ITBIS Exento", "company": company})
+
+	for tax in doc.taxes:
+		if tax.item_tax_template == tax_template:
+			return
+	doc.append("taxes", {"item_tax_template": tax_template})
