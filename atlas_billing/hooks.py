@@ -38,6 +38,8 @@ fixtures = [
 	{"dt": "Item Attribute", "filters": [["name", "=", "Longitud de pelo"]]},
 	{"dt": "Property Setter", "filters": [["name", "=", "Journal Entry-user_remark-reqd"]]},
 	{"dt": "Report", "filters": [["name", "in", ["Profit and cost", "Sales by category"]]]},
+	{"dt": "Print Format", "filters": [["name", "=", "Los gladiolos"]]},
+	{"dt": "Print Settings"},
 ]
 
 doctype_js = {
