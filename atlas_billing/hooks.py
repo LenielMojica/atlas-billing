@@ -41,6 +41,7 @@ fixtures = [
 	{"dt": "Print Format", "filters": [["name", "=", "Los gladiolos"]]},
 	{"dt": "Print Settings"},
 	{"dt": "Role", "filters": [["name", "in", ["Cajera", "Gerente"]]]},
+	{"dt": "Custom DocPerm", "filters": [["role", "in", ["Cajera", "Gerente"]]]},
 ]
 
 doctype_js = {
