@@ -40,6 +40,7 @@ fixtures = [
 	{"dt": "Report", "filters": [["name", "in", ["Profit and cost", "Sales by category"]]]},
 	{"dt": "Print Format", "filters": [["name", "=", "Los gladiolos"]]},
 	{"dt": "Print Settings"},
+	{"dt": "Role", "filters": [["name", "in", ["Cajera", "Gerente"]]]},
 ]
 
 doctype_js = {
