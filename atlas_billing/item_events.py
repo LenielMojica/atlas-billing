@@ -1,10 +1,26 @@
 import frappe
 from frappe import _
+from frappe.utils.nestedset import get_ancestors_of
+
+
+@frappe.whitelist(allow_guest=False)
+def get_item_category(item_group):
+	is_service = "Services" in get_ancestors_of("Item Group", item_group) or item_group == "Services"
+	is_capilar_service = (
+		"Servicios capilares" in get_ancestors_of("Item Group", item_group)
+		or item_group == "Servicios capilares"
+	)
+
+	return {"is_capilar": is_capilar_service, "is_service": is_service}
 
 
 # Create variants automatically for capilar services for length of hair
 def create_hair_variants(doc, method):
-	if doc.item_group == "Capilar" and not doc.variant_of:
+	is_capilar_service = (
+		"Servicios capilares" in get_ancestors_of("Item Group", doc.item_group)
+		or doc.item_group == "Servicios capilares"
+	)
+	if is_capilar_service and not doc.variant_of:
 		frappe.db.set_value("Item", doc.name, "has_variants", 1)
 
 		frappe.get_doc(
@@ -37,15 +53,15 @@ def create_hair_variants(doc, method):
 
 
 def validate_service_stock(doc, method):
-	parent_group = frappe.db.get_value("Item Group", doc.item_group, "parent_item_group")
+	is_service = "Services" in get_ancestors_of("Item Group", doc.item_group) or doc.item_group == "Services"
 
-	if (doc.item_group == "Services" or parent_group == "Services") and doc.is_stock_item:
+	if (is_service) and doc.is_stock_item:
 		frappe.throw(_("Los servicios no deben mantener inventario"))
 
 
 def validate_service_tax_exemption(doc, method):
-	parent_group = frappe.db.get_value("Item Group", doc.item_group, "parent_item_group")
-	if doc.item_group != "Services" and parent_group != "Services":
+	is_service = "Services" in get_ancestors_of("Item Group", doc.item_group) or doc.item_group == "Services"
+	if not is_service:
 		return
 	companies = frappe.get_all("Company", pluck="name")
 	if not companies:

@@ -1,0 +1,25 @@
+[
+ {
+  "docstatus": 0,
+  "doctype": "Custom Role",
+  "modified": "2026-08-22 13:00:51.721104",
+  "name": "md5vf2fnsn",
+  "page": "point-of-sale",
+  "ref_doctype": null,
+  "report": null,
+  "roles": [
+   {
+    "parent": "md5vf2fnsn",
+    "parentfield": "roles",
+    "parenttype": "Custom Role",
+    "role": "Cajera"
+   },
+   {
+    "parent": "md5vf2fnsn",
+    "parentfield": "roles",
+    "parenttype": "Custom Role",
+    "role": "Gerente"
+   }
+  ]
+ }
+]
