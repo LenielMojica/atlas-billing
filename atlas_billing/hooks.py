@@ -34,14 +34,50 @@ fixtures = [
 			]
 		],
 	},
-	{"dt": "Item Group", "filters": [["name", "in", ["Capilar", "Cuidado facial", "Masaje"]]]},
+	{
+		"dt": "Item Group",
+		"filters": [
+			[
+				"name",
+				"in",
+				[
+					"Servicios capilares",
+					"Servicios de cabina",
+					"Services",
+					"Lavado+Secado+Peinado",
+					"Accesorios",
+					"Productos Capilares",
+					"Products",
+					"Cuidado personal",
+					"Cuidado de la piel",
+					"Lavado",
+					"Secado",
+					"Peinado",
+					"Colores",
+					"Tratamiento",
+					"Alisados",
+					"Masajes",
+					"Facial",
+					"Depilacion",
+					"Inyecciones y terapia",
+					"Suplementos y medicina",
+				],
+			]
+		],
+	},
 	{"dt": "Item Attribute", "filters": [["name", "=", "Longitud de pelo"]]},
-	{"dt": "Property Setter", "filters": [["name", "=", "Journal Entry-user_remark-reqd"]]},
+	{
+		"dt": "Property Setter",
+		"filters": [
+			["name", "in", ["Journal Entry-user_remark-reqd", "POS Invoice-main-default_print_format"]]
+		],
+	},
 	{"dt": "Report", "filters": [["name", "in", ["Profit and cost", "Sales by category"]]]},
 	{"dt": "Print Format", "filters": [["name", "=", "Los gladiolos"]]},
 	{"dt": "Print Settings"},
 	{"dt": "Role", "filters": [["name", "in", ["Cajera", "Gerente"]]]},
 	{"dt": "Custom DocPerm", "filters": [["role", "in", ["Cajera", "Gerente"]]]},
+	{"dt": "Custom Role", "filters": [["page", "=", "point-of-sale"]]},
 ]
 
 doctype_js = {

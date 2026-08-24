@@ -3,6 +3,7 @@ from unittest.mock import patch
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
+from frappe.utils.nestedset import get_ancestors_of
 
 from atlas_billing.item_events import validate_service_stock
 from atlas_billing.utils import (
@@ -186,7 +187,9 @@ class TestValidateServiceStock(FrappeTestCase):
 				"is_stock_item": 0,
 			}
 		)
-		with patch("atlas_billing.item_events.frappe.db.get_value", return_value="Services"):
+		with patch(
+			"atlas_billing.item_events.get_ancestors_of", return_value=["Services", "All Item Groups"]
+		):
 			validate_service_stock(fake_doc, "validate")
 
 	def test_fails_when_stock_is_1(self):
@@ -195,7 +198,9 @@ class TestValidateServiceStock(FrappeTestCase):
 				"is_stock_item": 1,
 			}
 		)
-		with patch("atlas_billing.item_events.frappe.db.get_value", return_value="Services"):
+		with patch(
+			"atlas_billing.item_events.get_ancestors_of", return_value=["Services", "All Item Groups"]
+		):
 			with self.assertRaises(frappe.ValidationError):
 				validate_service_stock(fake_doc, "validate")
 
@@ -206,7 +211,7 @@ class TestValidateServiceStock(FrappeTestCase):
 				"is_stock_item": 1,
 			}
 		)
-		with patch("atlas_billing.item_events.frappe.db.get_value", return_value="All Item Groups"):
+		with patch("atlas_billing.item_events.get_ancestors_of", return_value=["All Item Groups"]):
 			with self.assertRaises(frappe.ValidationError):
 				validate_service_stock(fake_doc, "validate")
 
@@ -218,7 +223,7 @@ class TestCreateHairVariants(FrappeTestCase):
 				"doctype": "Item",
 				"item_code": "TEST-CORTE-HAIR",
 				"item_name": "Test Corte",
-				"item_group": "Capilar",
+				"item_group": "Servicios capilares",
 				"stock_uom": "Nos",
 				"is_stock_item": 0,
 			}
@@ -243,7 +248,7 @@ class TestSalesByCategoryReport(FrappeTestCase):
 				"doctype": "Item",
 				"item_code": "TEST-SERVICE-REPORT",
 				"item_name": "Test Service",
-				"item_group": "Cuidado facial",
+				"item_group": "Services",
 				"stock_uom": "Nos",
 				"is_stock_item": 0,
 			}
@@ -323,7 +328,7 @@ class TestProfitAndCostReport(FrappeTestCase):
 				"doctype": "Item",
 				"item_code": "TEST-SERVICE-REPORT",
 				"item_name": "Test Service",
-				"item_group": "Cuidado facial",
+				"item_group": "Services",
 				"stock_uom": "Nos",
 				"is_stock_item": 0,
 			}
@@ -404,7 +409,7 @@ class TestServiceWithTaxExemption(FrappeTestCase):
 				"item_code": "TEST-XX1",
 				"item_name": "Armonizacion",
 				"stock_uom": "Nos",
-				"item_group": "Cuidado facial",
+				"item_group": "Facial",
 				"is_stock_item": 0,
 			}
 		)
