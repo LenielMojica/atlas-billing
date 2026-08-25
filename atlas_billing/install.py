@@ -20,6 +20,7 @@ def create_generic_item():
 				"item_group": "Services",
 				"is_stock_item": 0,
 				"standard_rate": 0,
+				"uom": "Nos",
 			}
 		)
 		item.insert(ignore_permissions=True)
