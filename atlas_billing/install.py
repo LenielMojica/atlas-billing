@@ -2,8 +2,8 @@ import frappe
 
 
 def after_install():
-	create_generic_item()
 	create_exempt_item_tax_template()
+	create_generic_item()
 
 
 GENERIC_ITEM_CODE = "SERV-GENERICO"
