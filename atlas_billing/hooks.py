@@ -78,6 +78,29 @@ fixtures = [
 	{"dt": "Role", "filters": [["name", "in", ["Cajera", "Gerente"]]]},
 	{"dt": "Custom DocPerm", "filters": [["role", "in", ["Cajera", "Gerente", "System Manager"]]]},
 	{"dt": "Custom Role", "filters": [["page", "=", "point-of-sale"]]},
+	{
+		"dt": "Workspace",
+		"filters": [
+			[
+				"name",
+				"in",
+				[
+					"Assets",
+					"Tools",
+					"Build",
+					"Welcome Workspace",
+					"CRM",
+					"ERPNext Integrations",
+					"Integrations",
+					"Manufacturing",
+					"Projects",
+					"Quality",
+					"Support",
+					"Website",
+				],
+			]
+		],
+	},
 ]
 
 doctype_js = {
