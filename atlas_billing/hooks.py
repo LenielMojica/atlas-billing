@@ -1,5 +1,5 @@
 app_name = "atlas_billing"
-app_title = "atlas-biling"
+app_title = "atlas-billing"
 app_publisher = "Leniel"
 app_description = "Billing app"
 app_email = "lenielmr@gmail.com"
@@ -15,7 +15,7 @@ required_apps = ["erpnext"]
 # 	{
 # 		"name": "atlas_billing",
 # 		"logo": "/assets/atlas_billing/logo.png",
-# 		"title": "atlas-biling",
+# 		"title": "atlas-billing",
 # 		"route": "/atlas_billing",
 # 		"has_permission": "atlas_billing.api.permission.has_app_permission"
 # 	}
