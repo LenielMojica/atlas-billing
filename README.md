@@ -1,6 +1,22 @@
 ### atlas-billing
 
-Billing app
+[![CI](https://github.com/LenielMojica/atlas-billing/actions/workflows/ci.yml/badge.svg)](https://github.com/LenielMojica/atlas-billing/actions/workflows/ci.yml)
+[![Linters](https://github.com/LenielMojica/atlas-billing/actions/workflows/linter.yml/badge.svg)](https://github.com/LenielMojica/atlas-billing/actions/workflows/linter.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Built on Frappe](https://img.shields.io/badge/built%20on-Frappe%20%2F%20ERPNext-0089FF)](https://frappeframework.com/)
+
+A point-of-sale and billing system for a hair salon, built as a custom
+Frappe app on top of ERPNext. It handles day-to-day checkout at the salon —
+running a client's tab, charging for services and retail products on the
+same ticket, partial/credit payments, cancellations with a required reason,
+and cash register reconciliation at close — plus the accounting and
+reporting that comes with it (tax-exempt services, sales-by-category and
+profitability reports, receivable tracking).
+
+It's built as a thin layer on top of ERPNext's own Selling, Accounting, and
+POS modules rather than a system from scratch: most of the work is
+validation logic, a handful of custom fields, role permissions scoped to
+salon staff, and print formats — not reinventing invoicing or accounting.
 
 ### Installation
 
@@ -22,7 +38,7 @@ bench --site $SITE install-app atlas_billing --force
 
 Some settings depend on data (Company, Warehouse, chart of accounts, branding) that only exists once a real site is set up, so they can't be shipped as fixtures. Configure these by hand for each new site:
 
-- **POS Profile → Allow Partial Payment** — enable this on every POS Profile used at checkout. Without it, POS Invoice submission is rejected whenever the client doesn't pay in full (blocks recording a sale on credit — US-07).
+- **POS Profile → Allow Partial Payment** — enable this on every POS Profile used at checkout. Without it, POS Invoice submission is rejected whenever the client doesn't pay in full (blocks recording a sale on credit).
 - **POS Profile → Print Format** — set this to the app's receipt print format (`Los gladiolos`). The POS screens (both the live sale and the past-order reprint) read the print format from this field, not from the DocType's default print format — leaving it unset means no format is selectable when printing a POS Invoice from the POS.
 - **POS Profile → Warehouse** — required by ERPNext regardless of this app. The default Warehouse created by the Setup Wizard for your Company is fine to use as-is; it only matters once you sell items that carry real stock (e.g. retail products), since the salon's own service items are configured as non-stock and never move it.
 - **Letter Head** — create one Letter Head record with the salon's logo/branding and mark it **Is Default**. Print formats pull whichever Letter Head has `Is Default` checked automatically; without one, invoices print with a blank header. This isn't fixtured on purpose — the logo is specific to each client, and file attachments (images) aren't carried over by `export-fixtures` anyway.
@@ -46,12 +62,15 @@ Pre-commit is configured to use the following tools for checking and formatting 
 
 ### CI
 
-This app can use GitHub Actions for CI. The following workflows are configured:
+This app uses GitHub Actions:
 
-- CI: Installs this app and runs unit tests on every pull request.
-- Linters: Runs [Frappe Semgrep Rules](https://github.com/frappe/semgrep-rules) and [pip-audit](https://pypi.org/project/pip-audit/) on every pull request.
+- CI: installs the app and runs the test suite on every pull request.
+- Linters: runs [Frappe Semgrep Rules](https://github.com/frappe/semgrep-rules) and [pip-audit](https://pypi.org/project/pip-audit/) on every pull request.
 
+### Acknowledgments
+
+Built on [Frappe](https://frappeframework.com/) and [ERPNext](https://erpnext.com/) — this app is a thin custom layer on top of both, not a from-scratch system. Development, debugging, and server setup were done with the help of [Claude Code](https://claude.com/claude-code) (Anthropic) throughout the project.
 
 ### License
 
-mit
+See [LICENSE](LICENSE).
