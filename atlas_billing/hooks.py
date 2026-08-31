@@ -204,6 +204,7 @@ doc_events = {
 		"validate": [
 			"atlas_billing.item_events.validate_service_stock",
 			"atlas_billing.item_events.validate_service_tax_exemption",
+			"atlas_billing.item_events.validate_item_tax_template",
 		],
 	},
 	"POS Invoice": {

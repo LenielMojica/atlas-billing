@@ -73,3 +73,20 @@ def validate_service_tax_exemption(doc, method):
 		if tax.item_tax_template == tax_template:
 			return
 	doc.append("taxes", {"item_tax_template": tax_template})
+
+
+def validate_item_tax_template(doc, method):
+	is_product = "Products" in get_ancestors_of("Item Group", doc.item_group) or doc.item_group == "Products"
+	if not is_product:
+		return
+	companies = frappe.get_all("Company", pluck="name")
+	if not companies:
+		return
+	company = companies[0]
+	tax_template = frappe.db.get_value(
+		"Item Tax Template", {"title": "Dominican Republic Tax", "company": company}
+	)
+	for tax in doc.taxes:
+		if tax.item_tax_template == tax_template:
+			return
+	doc.append("taxes", {"item_tax_template": tax_template})
