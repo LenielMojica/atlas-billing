@@ -1,4 +1,10 @@
 frappe.ui.form.on("Item", {
+	refresh(frm) {
+		if (frm.is_new()) {
+			frm.toggle_reqd("item_code", false);
+			frm.set_df_property("item_code", "read_only", 1);
+		}
+	},
 	item_group(frm) {
 		if (!frm.doc.item_group) return;
 		frappe.call({
