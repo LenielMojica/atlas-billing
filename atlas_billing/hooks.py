@@ -30,7 +30,13 @@ fixtures = [
 			[
 				"fieldname",
 				"in",
-				["cancellation_reason", "tipo_cliente", "fecha_nacimiento", "custom_motivo_de_la_diferencia"],
+				[
+					"cancellation_reason",
+					"tipo_cliente",
+					"fecha_nacimiento",
+					"custom_motivo_de_la_diferencia",
+					"custom_group_code",
+				],
 			]
 		],
 	},
@@ -206,6 +212,7 @@ doc_events = {
 			"atlas_billing.item_events.validate_service_tax_exemption",
 			"atlas_billing.item_events.validate_item_tax_template",
 		],
+		"before_insert": "atlas_billing.item_events.assign_code",
 	},
 	"POS Invoice": {
 		"validate": [
