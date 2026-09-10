@@ -46,6 +46,7 @@ def create_generic_item():
 				"uom": "Nos",
 			}
 		)
+		item.flags.skip_auto_item_code = True
 		item.insert(ignore_permissions=True)
 
 	price_list = frappe.db.get_single_value("Selling Settings", "selling_price_list") or "Standard Selling"
