@@ -189,7 +189,7 @@ doc_events = {
 		# 		"on_update": "method",
 		# 		"on_cancel": "method",
 		# 		"on_trash": "method"
-		"after_insert": "atlas_billing.item_events.create_hair_variants",
+		# "after_insert": "atlas_billing.item_events.create_hair_variants",
 		"validate": [
 			"atlas_billing.item_events.validate_service_stock",
 			"atlas_billing.item_events.validate_service_tax_exemption",
