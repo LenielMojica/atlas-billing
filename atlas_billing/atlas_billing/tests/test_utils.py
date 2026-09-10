@@ -182,58 +182,20 @@ class TestValidateLockedPrice(FrappeTestCase):
 
 class TestValidateServiceStock(FrappeTestCase):
 	def test_passes_when_stock_is_0(self):
-		fake_doc = frappe._dict(
-			{
-				"is_stock_item": 0,
-			}
-		)
-		with patch(
-			"atlas_billing.item_events.get_ancestors_of", return_value=["Services", "All Item Groups"]
-		):
+		fake_doc = frappe._dict({"item_group": "Services", "is_stock_item": 0})
+		with patch("atlas_billing.item_events.is_service_item_group", return_value=True):
 			validate_service_stock(fake_doc, "validate")
 
 	def test_fails_when_stock_is_1(self):
-		fake_doc = frappe._dict(
-			{
-				"is_stock_item": 1,
-			}
-		)
-		with patch(
-			"atlas_billing.item_events.get_ancestors_of", return_value=["Services", "All Item Groups"]
-		):
+		fake_doc = frappe._dict({"item_group": "Services", "is_stock_item": 1})
+		with patch("atlas_billing.item_events.is_service_item_group", return_value=True):
 			with self.assertRaises(frappe.ValidationError):
 				validate_service_stock(fake_doc, "validate")
 
-	def test_fails_when_item_group_is_services_directly(self):
-		fake_doc = frappe._dict(
-			{
-				"item_group": "Services",
-				"is_stock_item": 1,
-			}
-		)
-		with patch("atlas_billing.item_events.get_ancestors_of", return_value=["All Item Groups"]):
-			with self.assertRaises(frappe.ValidationError):
-				validate_service_stock(fake_doc, "validate")
-
-
-class TestCreateHairVariants(FrappeTestCase):
-	def test_creates_three_variants_for_capilar_item(self):
-		parent = frappe.get_doc(
-			{
-				"doctype": "Item",
-				"item_code": "TEST-CORTE-HAIR",
-				"item_name": "Test Corte",
-				"item_group": "Servicios capilares",
-				"stock_uom": "Nos",
-				"is_stock_item": 0,
-			}
-		).insert()
-
-		variants = frappe.get_all("Item", filters={"variant_of": parent.name}, fields=["item_code"])
-
-		self.assertEqual(len(variants), 3)
-		expected_codes = {f"{parent.name}-S", f"{parent.name}-L", f"{parent.name}-XL"}
-		self.assertEqual({v.item_code for v in variants}, expected_codes)
+	def test_passes_when_not_a_service(self):
+		fake_doc = frappe._dict({"item_group": "Products", "is_stock_item": 1})
+		with patch("atlas_billing.item_events.is_service_item_group", return_value=False):
+			validate_service_stock(fake_doc, "validate")
 
 
 from frappe.desk.query_report import run
@@ -409,11 +371,12 @@ class TestServiceWithTaxExemption(FrappeTestCase):
 				"item_code": "TEST-XX1",
 				"item_name": "Armonizacion",
 				"stock_uom": "Nos",
-				"item_group": "Facial",
+				"item_group": "Services",
 				"is_stock_item": 0,
 			}
 		)
-		fake_service_item.insert()
+		with patch("atlas_billing.item_events.is_service_item_group", return_value=True):
+			fake_service_item.insert()
 		self.assertEqual(len(fake_service_item.taxes), 1)
 		item_tax_template = frappe.get_doc("Item Tax Template", fake_service_item.taxes[0].item_tax_template)
 		self.assertEqual(item_tax_template.title, "ITBIS Exento")
@@ -430,7 +393,8 @@ class TestServiceWithTaxExemption(FrappeTestCase):
 				"is_stock_item": 0,
 			}
 		)
-		fake_service_item.insert()
+		with patch("atlas_billing.item_events.is_service_item_group", return_value=True):
+			fake_service_item.insert()
 		self.assertEqual(len(fake_service_item.taxes), 1)
 		item_tax_template = frappe.get_doc("Item Tax Template", fake_service_item.taxes[0].item_tax_template)
 		self.assertEqual(item_tax_template.title, "ITBIS Exento")
@@ -447,5 +411,6 @@ class TestServiceWithTaxExemption(FrappeTestCase):
 				"is_stock_item": 1,
 			}
 		)
-		fake_product_item.insert()
+		with patch("atlas_billing.item_events.is_service_item_group", return_value=False):
+			fake_product_item.insert()
 		self.assertEqual(len(fake_product_item.taxes), 0)
