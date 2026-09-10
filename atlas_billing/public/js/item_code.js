@@ -5,7 +5,8 @@ frappe.ui.form.on("Item", {
 			frm.set_df_property("item_code", "read_only", 1);
 		}
 	},
-	item_group(frm) {
+});
+/*	item_group(frm) {
 		if (!frm.doc.item_group) return;
 		frappe.call({
 			method: "atlas_billing.item_events.get_item_category",
@@ -34,4 +35,4 @@ frappe.ui.form.on("Item", {
 			},
 		});
 	},
-});
+});*/
