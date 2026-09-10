@@ -136,7 +136,9 @@ def assign_code(doc, method):
 
 		ancestors_codes.append(code)
 
-	ancestors_codes.append(frappe.db.get_value("Item Group", doc.item_group, "custom_group_code"))
+	own_code = frappe.db.get_value("Item Group", doc.item_group, "custom_group_code")
+	if own_code:
+		ancestors_codes.append(own_code)
 
 	item_code = "-".join(ancestors_codes)
 	doc.item_code = make_autoname(f"{item_code}-.####")
