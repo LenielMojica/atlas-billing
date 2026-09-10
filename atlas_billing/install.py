@@ -7,7 +7,30 @@ def after_install():
 
 
 GENERIC_ITEM_CODE = "SERV-GENERICO"
-PRICE_LIST = "Standard Selling"  # confirma que tu POS Profile usa esta
+
+
+def _get_service_item_group():
+	"""Find the Item Group flagged custom_item_category="Service", creating one if none exists yet.
+
+	Avoids hardcoding a group name: ERPNext's setup wizard names its default
+	groups ("Services", "Servicios", etc.) depending on the site's language.
+	"""
+	existing = frappe.db.get_value("Item Group", {"custom_item_category": "Service"}, "name")
+	if existing:
+		return existing
+
+	root = frappe.db.get_value("Item Group", {"is_group": 1, "parent_item_group": ""}, "name")
+	item_group = frappe.get_doc(
+		{
+			"doctype": "Item Group",
+			"item_group_name": "Servicios",
+			"parent_item_group": root,
+			"is_group": 0,
+			"custom_item_category": "Service",
+		}
+	)
+	item_group.insert(ignore_permissions=True)
+	return item_group.name
 
 
 def create_generic_item():
@@ -17,7 +40,7 @@ def create_generic_item():
 				"doctype": "Item",
 				"item_code": GENERIC_ITEM_CODE,
 				"item_name": "Servicio genérico",
-				"item_group": "Services",
+				"item_group": _get_service_item_group(),
 				"is_stock_item": 0,
 				"standard_rate": 0,
 				"uom": "Nos",
@@ -25,12 +48,13 @@ def create_generic_item():
 		)
 		item.insert(ignore_permissions=True)
 
-	if not frappe.db.exists("Item Price", {"item_code": GENERIC_ITEM_CODE, "price_list": PRICE_LIST}):
+	price_list = frappe.db.get_single_value("Selling Settings", "selling_price_list") or "Standard Selling"
+	if not frappe.db.exists("Item Price", {"item_code": GENERIC_ITEM_CODE, "price_list": price_list}):
 		frappe.get_doc(
 			{
 				"doctype": "Item Price",
 				"item_code": GENERIC_ITEM_CODE,
-				"price_list": PRICE_LIST,
+				"price_list": price_list,
 				"price_list_rate": 1,
 			}
 		).insert(ignore_permissions=True)

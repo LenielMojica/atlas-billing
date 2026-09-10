@@ -36,6 +36,7 @@ fixtures = [
 					"fecha_nacimiento",
 					"custom_motivo_de_la_diferencia",
 					"custom_group_code",
+					"custom_item_category",
 				],
 			]
 		],
