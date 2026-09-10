@@ -41,43 +41,26 @@ fixtures = [
 		],
 	},
 	{
-		"dt": "Item Group",
+		"dt": "Property Setter",
 		"filters": [
 			[
 				"name",
 				"in",
 				[
-					"Servicios capilares",
-					"Servicios de cabina",
-					"Services",
-					"Lavado+Secado+Peinado",
-					"Accesorios",
-					"Productos Capilares",
-					"Products",
-					"Cuidado personal",
-					"Cuidado de la piel",
-					"Lavado",
-					"Secado",
-					"Peinado",
-					"Colores",
-					"Tratamiento",
-					"Alisados",
-					"Masajes",
-					"Facial",
-					"Depilacion",
-					"Inyecciones y terapia",
-					"Suplementos y medicina",
+					"Journal Entry-user_remark-reqd",
+					"POS Invoice-main-default_print_format",
+					"Item-main-quick_entry",
 				],
 			]
 		],
 	},
-	{"dt": "Item Attribute", "filters": [["name", "=", "Longitud de pelo"]]},
-	{
-		"dt": "Property Setter",
-		"filters": [
-			["name", "in", ["Journal Entry-user_remark-reqd", "POS Invoice-main-default_print_format"]]
-		],
-	},
+	# {"dt": "Item Attribute", "filters": [["name", "=", "Longitud de pelo"]]},
+	# {
+	# "dt": "Property Setter",
+	# "filters": [
+	# ["name", "in", ["Journal Entry-user_remark-reqd", "POS Invoice-main-default_print_format"]]
+	# ],
+	# },
 	{"dt": "Report", "filters": [["name", "in", ["Profit and cost", "Sales by category"]]]},
 	{"dt": "Print Format", "filters": [["name", "=", "Los gladiolos"]]},
 	{"dt": "Print Settings"},
@@ -88,7 +71,7 @@ fixtures = [
 
 doctype_js = {
 	"POS Invoice": ["public/js/pos_invoice_item.js", "public/js/pos_invoice_cancel.js"],
-	"Item": ["public/js/item_variants_handler.js"],
+	"Item": ["public/js/item_code.js"],
 }
 # include js, css files in header of desk.html
 # app_include_css = "/assets/atlas_billing/css/atlas_billing.css"
