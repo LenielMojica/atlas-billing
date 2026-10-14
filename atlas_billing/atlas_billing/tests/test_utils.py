@@ -3,8 +3,10 @@ from unittest.mock import patch
 
 import frappe
 from frappe.tests.utils import FrappeTestCase
-from frappe.utils.nestedset import get_ancestors_of
+from frappe.utils import nowdate
+from frappe.utils.nestedset import get_ancestors_of, get_root_of
 
+from atlas_billing.install import create_exempt_item_tax_template
 from atlas_billing.item_events import validate_service_stock
 from atlas_billing.utils import (
 	validate_cancellation_reason,
@@ -12,6 +14,58 @@ from atlas_billing.utils import (
 	validate_generic_item,
 	validate_locked_price,
 )
+
+
+def get_company():
+	name = frappe.defaults.get_global_default("company") or frappe.db.get_value("Company", {}, "name")
+	return frappe.get_doc("Company", name)
+
+
+def get_accounting_defaults():
+	"""Company, accounts and warehouse of whatever site the tests run on (dev site or CI)."""
+	company = get_company()
+	return frappe._dict(
+		company=company.name,
+		abbr=company.abbr,
+		income_account=company.default_income_account or f"Sales - {company.abbr}",
+		cost_center=company.cost_center or f"Main - {company.abbr}",
+		warehouse=f"Stores - {company.abbr}",
+	)
+
+
+def get_test_customer():
+	existing = frappe.db.get_value("Customer", {"customer_name": "Test Customer"})
+	if existing:
+		return existing
+
+	customer = frappe.get_doc(
+		{
+			"doctype": "Customer",
+			"customer_name": "Test Customer",
+			# ERPNext rejects group-type Customer Groups, so pick a leaf one (e.g. "Individual").
+			"customer_group": frappe.db.get_value("Customer Group", {"is_group": 0}, "name"),
+			"territory": get_root_of("Territory"),
+			"tipo_cliente": "Normal",
+		}
+	)
+	customer.insert()
+	return customer.name
+
+
+def get_test_supplier():
+	existing = frappe.db.get_value("Supplier", {"supplier_name": "Test Supplier"})
+	if existing:
+		return existing
+
+	supplier = frappe.get_doc(
+		{
+			"doctype": "Supplier",
+			"supplier_name": "Test Supplier",
+			"supplier_group": get_root_of("Supplier Group"),
+		}
+	)
+	supplier.insert()
+	return supplier.name
 
 
 class TestValidateGenericItem(FrappeTestCase):
@@ -203,7 +257,9 @@ from frappe.desk.query_report import run
 
 class TestSalesByCategoryReport(FrappeTestCase):
 	def test_splits_totals_between_service_and_product(self):
-		test_date = "2026-02-15"
+		# Today's date, so it always falls inside the fiscal year the test site has.
+		test_date = nowdate()
+		defaults = get_accounting_defaults()
 
 		service_item = frappe.get_doc(
 			{
@@ -241,8 +297,8 @@ class TestSalesByCategoryReport(FrappeTestCase):
 		invoice = frappe.get_doc(
 			{
 				"doctype": "Sales Invoice",
-				"customer": "Leniel",
-				"company": "Ejemplo Src",
+				"customer": get_test_customer(),
+				"company": defaults.company,
 				"posting_date": test_date,
 				"due_date": test_date,
 				"set_posting_time": 1,
@@ -251,22 +307,22 @@ class TestSalesByCategoryReport(FrappeTestCase):
 						"item_code": service_item.name,
 						"qty": 1,
 						"rate": 300,
-						"income_account": "Sales - ES",
-						"cost_center": "Main - ES",
+						"income_account": defaults.income_account,
+						"cost_center": defaults.cost_center,
 					},
 					{
 						"item_code": product_item.name,
 						"qty": 1,
 						"rate": 500,
-						"income_account": "Sales - ES",
-						"cost_center": "Main - ES",
+						"income_account": defaults.income_account,
+						"cost_center": defaults.cost_center,
 					},
 					{
 						"item_code": direct_service_item.name,
 						"qty": 1,
 						"rate": 100,
-						"income_account": "Sales - ES",
-						"cost_center": "Main - ES",
+						"income_account": defaults.income_account,
+						"cost_center": defaults.cost_center,
 					},
 				],
 			}
@@ -284,7 +340,9 @@ class TestSalesByCategoryReport(FrappeTestCase):
 
 class TestProfitAndCostReport(FrappeTestCase):
 	def test_calculates_profit(self):
-		test_date = "2026-02-15"
+		test_date = nowdate()
+		defaults = get_accounting_defaults()
+
 		service_item = frappe.get_doc(
 			{
 				"doctype": "Item",
@@ -315,11 +373,11 @@ class TestProfitAndCostReport(FrappeTestCase):
 						"item_code": product_item.name,
 						"qty": 10,
 						"rate": "200",
-						"warehouse": "Stores - ES",
+						"warehouse": defaults.warehouse,
 					}
 				],
-				"supplier": "Gladiolos",
-				"company": "Ejemplo Src",
+				"supplier": get_test_supplier(),
+				"company": defaults.company,
 			}
 		)
 		stock_entry.insert()
@@ -327,8 +385,8 @@ class TestProfitAndCostReport(FrappeTestCase):
 		invoice = frappe.get_doc(
 			{
 				"doctype": "Sales Invoice",
-				"customer": "Leniel",
-				"company": "Ejemplo Src",
+				"customer": get_test_customer(),
+				"company": defaults.company,
 				"posting_date": test_date,
 				"due_date": test_date,
 				"set_posting_time": 1,
@@ -337,15 +395,15 @@ class TestProfitAndCostReport(FrappeTestCase):
 						"item_code": product_item.name,
 						"qty": 4,
 						"rate": 500,
-						"income_account": "Sales - ES",
-						"cost_center": "Main - ES",
+						"income_account": defaults.income_account,
+						"cost_center": defaults.cost_center,
 					},
 					{
 						"item_code": service_item.name,
 						"qty": 2,
 						"rate": 500,
-						"income_account": "Sales - ES",
-						"cost_center": "Main - ES",
+						"income_account": defaults.income_account,
+						"cost_center": defaults.cost_center,
 					},
 				],
 			}
@@ -364,6 +422,24 @@ class TestProfitAndCostReport(FrappeTestCase):
 
 
 class TestServiceWithTaxExemption(FrappeTestCase):
+	@classmethod
+	def setUpClass(cls):
+		super().setUpClass()
+		# The "ITBIS Exento" template is only created when an "ITBIS" account exists
+		# (see install.py), and a fresh test site doesn't have one.
+		defaults = get_accounting_defaults()
+		if not frappe.db.exists("Account", {"account_name": "ITBIS", "company": defaults.company}):
+			frappe.get_doc(
+				{
+					"doctype": "Account",
+					"account_name": "ITBIS",
+					"company": defaults.company,
+					"parent_account": f"Duties and Taxes - {defaults.abbr}",
+					"account_type": "Tax",
+				}
+			).insert()
+		create_exempt_item_tax_template()
+
 	def test_exempt_when_is_subservice(self):
 		fake_service_item = frappe.get_doc(
 			{
