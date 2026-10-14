@@ -42,7 +42,8 @@ def get_test_customer():
 		{
 			"doctype": "Customer",
 			"customer_name": "Test Customer",
-			"customer_group": get_root_of("Customer Group"),
+			# ERPNext rejects group-type Customer Groups, so pick a leaf one (e.g. "Individual").
+			"customer_group": frappe.db.get_value("Customer Group", {"is_group": 0}, "name"),
 			"territory": get_root_of("Territory"),
 			"tipo_cliente": "Normal",
 		}
