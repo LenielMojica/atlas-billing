@@ -26,6 +26,7 @@ def _get_service_item_group():
 			"item_group_name": "Servicios",
 			"parent_item_group": root,
 			"is_group": 0,
+			"custom_group_code": "SERV",
 			"custom_item_category": "Service",
 		}
 	)
