@@ -1,22 +1,13 @@
-### atlas-billing
+  ### atlas-billing
 
 [![CI](https://github.com/LenielMojica/atlas-billing/actions/workflows/ci.yml/badge.svg)](https://github.com/LenielMojica/atlas-billing/actions/workflows/ci.yml)
 [![Linters](https://github.com/LenielMojica/atlas-billing/actions/workflows/linter.yml/badge.svg)](https://github.com/LenielMojica/atlas-billing/actions/workflows/linter.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Built on Frappe](https://img.shields.io/badge/built%20on-Frappe%20%2F%20ERPNext-0089FF)](https://frappeframework.com/)
 
-A point-of-sale and billing system for a hair salon, built as a custom
-Frappe app on top of ERPNext. It handles day-to-day checkout at the salon —
-running a client's tab, charging for services and retail products on the
-same ticket, partial/credit payments, cancellations with a required reason,
-and cash register reconciliation at close — plus the accounting and
-reporting that comes with it (tax-exempt services, sales-by-category and
-profitability reports, receivable tracking).
-
-It's built as a thin layer on top of ERPNext's own Selling, Accounting, and
-POS modules rather than a system from scratch: most of the work is
-validation logic, a handful of custom fields, role permissions scoped to
-salon staff, and print formats — not reinventing invoicing or accounting.
+A point-of-sale and billing system for a hair salon in the Dominican Republic, built as a custom [Frappe](https://frappeframework.com/) app on top of [ERPNext](https://erpnext.com/). It replaced the salon's handwritten register and Excel sheets and is used daily at checkout.
+ 
+Rather than rebuilding invoicing or accounting, Atlas Billing is a thin layer over ERPNext's Selling, Accounting, and POS modules. It adds the salon's business rules, custom fields, staff roles, reports, and a receipt format.
 ## Screenshots
 | **Home** | **POS Opening Entry** |
 |:---:|:---:|
@@ -33,49 +24,80 @@ bench get-app $URL_OF_THIS_REPO --branch main
 bench install-app atlas_billing
 ```
 
-**Important — run the Setup Wizard first.** `atlas_billing`'s `after_install` creates a generic Item under the Item Group "Services", but that Item Group (and other ERPNext defaults) only exist once the Setup Wizard has run. On a brand new site, complete `install-app erpnext` → the Setup Wizard in the browser (Company, country, currency) → **then** `install-app atlas_billing`. If `atlas_billing` was installed before the Setup Wizard ran, `after_install` fails partway through but Frappe still marks the app as installed — re-running `bench install-app atlas_billing` afterwards just prints "already installed" and does nothing. Fix by re-running with `--force`:
-
+## Tech stack
+ 
+| Area | Tools |
+|------|-------|
+| Framework | Frappe v15, ERPNext v15 |
+| Languages | Python, JavaScript, SQL, Jinja |
+| Database | MariaDB |
+| Testing & CI | Frappe test runner, GitHub Actions |
+| Code quality | Ruff, ESLint, Prettier, Semgrep, pip-audit (via pre-commit) |
+| Deployment | Ubuntu, Nginx, Supervisor, UFW, WireGuard |
+ 
+## Installation
+ 
+Requires a [bench](https://github.com/frappe/bench) with Frappe and ERPNext v15.
+ 
+1. Create a site with ERPNext and **complete the Setup Wizard in the browser first** (company, country, currency). The app's install step needs the company, chart of accounts, and item groups that the wizard creates.
+2. Install the app:
 ```bash
-bench --site $SITE install-app atlas_billing --force
+   bench get-app https://github.com/LenielMojica/atlas-billing --branch main
+   bench --site <your-site> install-app atlas_billing
 ```
-
-### Post-install setup
-
-Some settings depend on data (Company, Warehouse, chart of accounts, branding) that only exists once a real site is set up, so they can't be shipped as fixtures. Configure these by hand for each new site:
-
-- **POS Profile → Allow Partial Payment** — enable this on every POS Profile used at checkout. Without it, POS Invoice submission is rejected whenever the client doesn't pay in full (blocks recording a sale on credit).
-- **POS Profile → Print Format** — set this to the app's receipt print format (`your-custom-print-format`). The POS screens (both the live sale and the past-order reprint) read the print format from this field, not from the DocType's default print format — leaving it unset means no format is selectable when printing a POS Invoice from the POS.
-- **POS Profile → Warehouse** — required by ERPNext regardless of this app. The default Warehouse created by the Setup Wizard for your Company is fine to use as-is; it only matters once you sell items that carry real stock (e.g. retail products), since the salon's own service items are configured as non-stock and never move it.
-- **Letter Head** — create one Letter Head record with the salon's logo/branding and mark it **Is Default**. Print formats pull whichever Letter Head has `Is Default` checked automatically; without one, invoices print with a blank header. This isn't fixtured on purpose — the logo is specific to each client, and file attachments (images) aren't carried over by `export-fixtures` anyway.
-- **Hide unused Workspaces** — from the sidebar's Edit mode ("..." → Hide), hide the modules the salon doesn't use: Assets, Manufacturing, Projects, Quality, CRM, Support, Website, Integrations, ERPNext Integrations, Automation → Tools, Core → Build, and Core → Welcome Workspace. This can't be fixtured — Frappe's fixture sync deliberately ignores the `is_hidden` field on Workspace (`frappe/modules/import_file.py`'s `ignore_values`), always keeping whatever value is already in that site's database instead of the one being imported.
-
-### Contributing
-
-This app uses `pre-commit` for code formatting and linting. Please [install pre-commit](https://pre-commit.com/#installation) and enable it for this repository:
-
+ 
+   If the app was installed before the Setup Wizard ran and its setup didn't complete, run the install again with `--force`:
+ 
+```bash
+   bench --site <your-site> install-app atlas_billing --force
+```
+ 
+## Post-install setup
+ 
+Some settings depend on data that only exists on a real site (company, warehouse, chart of accounts, branding), so they can't ship as fixtures. Configure them once per site:
+ 
+- **Item Groups → Item Category and Group code.** Mark your service groups as `Service` and product groups as `Product`, and give each group a short code. Tax templates, the services-can't-be-stock rule, and item codes all depend on these.
+- **ITBIS account.** The ITBIS-exempt tax template is created automatically when an account named `ITBIS` exists in the chart of accounts.
+- **POS Profile → Allow Partial Payment.** Enable it on every POS Profile used at checkout; otherwise sales on credit are rejected.
+- **POS Profile → Print Format.** Select the app's receipt format. The POS screens read the format from the POS Profile, not from the DocType's default, so without this no format is available when printing from the POS.
+- **POS Profile → Warehouse.** Required by ERPNext. The default warehouse from the Setup Wizard is fine; it only matters for retail products, since services are non-stock.
+- **Letter Head.** Create one with the salon's logo and mark it **Is Default**, or receipts print with a blank header. It's not a fixture because the logo is specific to each client.
+- **Hide unused Workspaces.** From the sidebar's edit mode, hide modules the salon doesn't use (Assets, Manufacturing, Projects, Quality, CRM, Support, Website, Integrations, and similar). This can't be a fixture: Frappe's fixture sync deliberately ignores `Workspace.is_hidden` (`ignore_values` in `frappe/modules/import_file.py`).
+## Testing
+ 
+The suite has unit tests for the validation rules (fast, using mocks, no database) and integration tests that create real items and invoices to check the reports and tax templates.
+ 
+```bash
+bench --site <test-site> set-config allow_tests true
+bench --site <test-site> run-tests --app atlas_billing
+```
+ 
+## CI
+ 
+GitHub Actions runs on every pull request:
+ 
+- **CI:** installs Frappe, ERPNext, and the app on a fresh site, then runs the test suite.
+- **Linters:** pre-commit hooks, [Frappe Semgrep rules](https://github.com/frappe/semgrep-rules), and [pip-audit](https://pypi.org/project/pip-audit/) for vulnerable dependencies.
+## Deployment
+ 
+The production site runs on an Ubuntu VPS using `bench setup production`: Nginx serves static files and proxies the app, and Supervisor keeps its processes running and restarts them on failure. The firewall (UFW) only accepts web traffic from a WireGuard VPN, so the app is reachable only from the salon's own devices.
+ 
+## Roadmap
+ 
+- Classify sales in both reports by the Item Category flag instead of the item group's name, so they work on sites set up in any language.
+## Contributing
+ 
+This app uses [pre-commit](https://pre-commit.com/) for formatting and linting (Ruff, ESLint, Prettier):
+ 
 ```bash
 cd apps/atlas_billing
 pre-commit install
 ```
-
-Pre-commit is configured to use the following tools for checking and formatting your code:
-
-- ruff
-- eslint
-- prettier
-- pyupgrade
-
-### CI
-
-This app uses GitHub Actions:
-
-- CI: installs the app and runs the test suite on every pull request.
-- Linters: runs [Frappe Semgrep Rules](https://github.com/frappe/semgrep-rules) and [pip-audit](https://pypi.org/project/pip-audit/) on every pull request.
-
-### Acknowledgments
-
-Built on [Frappe](https://frappeframework.com/) and [ERPNext](https://erpnext.com/) — this app is a thin custom layer on top of both, not a from-scratch system. Development, debugging, and server setup were done with the help of [Claude Code](https://claude.com/claude-code) (Anthropic) throughout the project.
-
-### License
-
-See [LICENSE](LICENSE).
+ 
+## Acknowledgments
+ 
+Built on [Frappe](https://frappeframework.com/) and [ERPNext](https://erpnext.com/). Development, debugging, and server setup were done with the help of [Claude Code](https://claude.com/claude-code) (Anthropic).
+ 
+## License
+ 
+[MIT](LICENSE)
