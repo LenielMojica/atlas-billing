@@ -19,7 +19,7 @@ validation logic, a handful of custom fields, role permissions scoped to
 salon staff, and print formats — not reinventing invoicing or accounting.
 ## Screenshots
 | **Home** | **POS Opening Entry** | **POS** |
-|:---:|:---:|
+|:---:|:---:||:---:|
 | ![Home](screenshots/Home.png) | ![POS Opening Entry](screenshots/opening-entry.png) |  ![POS](screenshots/POS.png) |
 | **Receipt** |
  ![Invoice](screenshots/Invoice.png) |
