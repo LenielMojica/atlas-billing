@@ -14,16 +14,52 @@ Rather than rebuilding invoicing or accounting, Atlas Billing is a thin layer ov
 | ![Home](screenshots/Home.png) | ![POS Opening Entry](screenshots/opening-entry.png) |
 | **POS** | **Receipt** |
 |  ![POS](screenshots/POS.png) | ![Invoice](screenshots/Invoice.png) |
-### Installation
 
-You can install this app using the [bench](https://github.com/frappe/bench) CLI:
 
-```bash
-cd $PATH_TO_YOUR_BENCH
-bench get-app $URL_OF_THIS_REPO --branch main
-bench install-app atlas_billing
+## Features
+ 
+**Checkout**
+- Services and retail products on the same ticket, with partial and credit payments.
+- **Generic service item** for one-off services: the cashier is prompted for a description and a price, and the sale is rejected without them.
+- **Price locks:** prices must match the catalog price list; only users with the Item Manager role can override them.
+- **Cancellations require a reason**, collected in a dialog and validated on the server, so every voided sale leaves an audit trail.
+- **Cash closing:** any difference between expected and counted cash must be explained before the POS Closing Entry can be saved.
+**Taxes and catalog**
+- Services automatically get the **ITBIS-exempt** tax template; products get the standard Dominican Republic tax template.
+- Services can't be set as stock items.
+- **Automatic item codes** built from the item group hierarchy (e.g. `SERV-CAP-0001`).
+- Customer fields for client type (Normal / VIP) and birthday.
+**Staff and reporting**
+- Two roles with scoped permissions: **Cajera** (cashier, lands directly on the POS) and **Gerente** (manager).
+- **Sales by category** report (exempt services vs. taxed products) and **Profit and cost** report (margin per product from its valuation rate).
+- 80 mm thermal receipt print format (Jinja).
+## How it's built
+ 
+Atlas Billing hooks into ERPNext's own documents instead of replacing them:
+ 
+| Hook | Document | What it does |
+|------|----------|--------------|
+| `before_insert` | Item | Generates the item code from the item group hierarchy |
+| `validate` | Item | Blocks stock on services; assigns the right tax template |
+| `validate` | POS Invoice | Enforces generic-item rules and price locks |
+| `before_cancel` | POS Invoice | Requires a cancellation reason |
+| `validate` | POS Closing Entry | Requires an explanation for cash differences |
+ 
+Client-side scripts add the dialogs for the generic service and the cancellation reason. Configuration that should be identical on every site (custom fields, roles, permissions, reports, print format) ships as **fixtures**, so it's versioned in Git and re-applied on every `bench migrate`.
+ 
+Services and products are identified by an **Item Category** flag on the item group rather than by the group's name. ERPNext's Setup Wizard names the default groups in the site's language ("Services", "Servicios", ...), so name-based checks break across languages.
+ 
 ```
-
+atlas_billing/
+├── hooks.py            # document events, fixtures, client scripts
+├── item_events.py      # item codes, service/product rules, tax templates
+├── utils.py            # POS Invoice and POS Closing Entry validations
+├── install.py          # generic service item, ITBIS-exempt template
+├── fixtures/           # custom fields, roles, permissions, reports, print format
+├── public/js/          # dialogs for generic items and cancellations
+└── atlas_billing/tests/
+```
+ 
 ## Tech stack
  
 | Area | Tools |
@@ -33,7 +69,7 @@ bench install-app atlas_billing
 | Database | MariaDB |
 | Testing & CI | Frappe test runner, GitHub Actions |
 | Code quality | Ruff, ESLint, Prettier, Semgrep, pip-audit (via pre-commit) |
-| Deployment | Ubuntu, Nginx, Supervisor, UFW, WireGuard |
+| Deployment | Ubuntu, Nginx, Supervisor, UFW, WireGuard, rclone + Backblaze B2 (backups) |
  
 ## Installation
  
@@ -82,6 +118,8 @@ GitHub Actions runs on every pull request:
  
 The production site runs on an Ubuntu VPS using `bench setup production`: Nginx serves static files and proxies the app, and Supervisor keeps its processes running and restarts them on failure. The firewall (UFW) only accepts web traffic from a WireGuard VPN, so the app is reachable only from the salon's own devices.
  
+Backups run automatically: cron jobs use [rclone](https://rclone.org/) to copy them off-site to Backblaze B2, so the salon's sales records survive even if the server is lost.
+ 
 ## Roadmap
  
 - Classify sales in both reports by the Item Category flag instead of the item group's name, so they work on sites set up in any language.
@@ -101,3 +139,4 @@ Built on [Frappe](https://frappeframework.com/) and [ERPNext](https://erpnext.co
 ## License
  
 [MIT](LICENSE)
+ 
