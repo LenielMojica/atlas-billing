@@ -18,11 +18,11 @@ POS modules rather than a system from scratch: most of the work is
 validation logic, a handful of custom fields, role permissions scoped to
 salon staff, and print formats — not reinventing invoicing or accounting.
 ## Screenshots
-| **Home** | **POS Opening Entry** | 
+| **Home** | **POS Opening Entry** | **POS** |
 |:---:|:---:|
-| ![Home](screenshots/Home.png) | ![POS Opening Entry](screenshots/opening-entry.png) | 
-| **POS** | **Receipt** |
-| ![POS](screenshots/POS.png) | ![Invoice](screenshots/Invoice.png) |
+| ![Home](screenshots/Home.png) | ![POS Opening Entry](screenshots/opening-entry.png) |  ![POS](screenshots/POS.png) |
+| **Receipt** |
+ ![Invoice](screenshots/Invoice.png) |
 ### Installation
 
 You can install this app using the [bench](https://github.com/frappe/bench) CLI:
