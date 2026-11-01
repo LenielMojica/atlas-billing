@@ -42,7 +42,7 @@ def validate_locked_price(doc, method):
 
 
 @frappe.whitelist()
-def get_customer_outstanding(customer):
+def get_customer_outstanding(customer: str):
 	frappe.has_permission("Customer", doc=customer, throw=True)
 
 	sales_invoice_outstanding = frappe.get_all(
@@ -64,7 +64,9 @@ def get_customer_outstanding(customer):
 
 
 @frappe.whitelist()
-def make_customer_payment_entry(customer, company=None, mode_of_payment=None):
+def make_customer_payment_entry(
+	customer: str, company: str | None = None, mode_of_payment: str | None = None
+):
 	"""Unsaved Payment Entry receiving money from `customer`, with every account and currency set."""
 	frappe.has_permission("Customer", doc=customer, throw=True)
 	frappe.has_permission("Payment Entry", "create", throw=True)
