@@ -90,7 +90,7 @@ doctype_js = {
 # webform_include_css = {"doctype": "public/css/doctype.css"}
 
 # include js in page
-page_js = {"point-of-sale": "public/js/pos_customer_outstanding.js"}
+page_js = {"point-of-sale": ["public/js/pos_customer_outstanding.js", "public/js/pos_credit_sale.js"]}
 
 # include js in doctype views
 # doctype_js = {"doctype" : "public/js/doctype.js"}
